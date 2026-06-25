@@ -100,7 +100,7 @@ def get_current_weather(lat, lon):
     return response.json()
 current_data = get_current_weather(LATITUDE, LONGITUDE)
 current_temp = current_data["current"]["temperature_2m"]
-current_temp_f = (current_temp * 9/5) + 32
+current_temp_f = round((current_temp * 9/5) + 32, 1)
 current_time = current_data["current"]["time"]
 
 log_df = pd.DataFrame({
