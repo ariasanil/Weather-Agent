@@ -1,7 +1,13 @@
+import os
+os.environ['MPLBACKEND'] = 'Agg'
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 import requests
 import pandas as pd
 from datetime import date
-import os
 
 # My camping location
 LATITUDE = 36.05
@@ -112,4 +118,39 @@ log_df = pd.DataFrame({
 log_file = "daily_log.csv"
 log_df.to_csv(log_file, mode='a', header=not os.path.isfile(log_file), index=False)
 print(f"Logged current temperature: {current_temp} degrees C at {current_time}")
+
+def generate_dashboard():
+    df = pd.read_csv("daily_log.csv", skipinitialspace=True)
+
+    df["datetime"] = pd.to_datetime(df["time"])
+    df = df.sort_values("datetime")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(df["datetime"], df["temperature_2m_f"], color="steelblue",
+            linewidth=2, marker='o', markersize=5, label="Temp (°F)")
+    max_idx = df["temperature_2m_f"].idxmax()
+    min_idx = df["temperature_2m_f"].idxmin()
+
+    ax.scatter(df.loc[max_idx, "datetime"], df.loc[max_idx, "temperature_2m_f"],
+               color="red", zorder=5, label=f"Max: {df.loc[max_idx, 'temperature_2m_f']}°F")
+    ax.scatter(df.loc[min_idx, "datetime"], df.loc[min_idx, "temperature_2m_f"],
+               color="blue", zorder=5, label=f"Min: {df.loc[min_idx, 'temperature_2m_f']}°F")
+    ax.annotate(f"Max: {df.loc[max_idx, 'temperature_2m_f']}°F",
+                xy=(df.loc[max_idx, "datetime"], df.loc[max_idx, "temperature_2m_f"]),
+                xytext=(10, 10), textcoords="offset points",
+                color="red", fontsize=9)
+    ax.annotate(f"Min: {df.loc[min_idx, 'temperature_2m_f']}°F",
+                xy=(df.loc[min_idx, "datetime"], df.loc[min_idx, "temperature_2m_f"]),
+                xytext=(10, -15), textcoords="offset points",
+                color="blue", fontsize=9)
+
+    ax.set_ylim(df["temperature_2m_f"].min() - 5, df["temperature_2m_f"].max() + 8)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+    plt.xticks(rotation=45)
+    ax.set_title("My City Temperature Dashboard")
+    ax.set_ylabel("Temperature (°F)")
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig("dashboard.png", dpi=150)
+    plt.close()
+generate_dashboard()
 
