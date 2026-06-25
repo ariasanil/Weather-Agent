@@ -106,7 +106,7 @@ current_time = current_data["current"]["time"]
 log_df = pd.DataFrame({
     "date": [str(today)],
     "time": [current_time],
-    "temperature_2m_c": [current_temp]
+    "temperature_2m_c": [current_temp],
     "temperature_2m_f": [current_temp_f]
 })
 log_file = "daily_log.csv"
